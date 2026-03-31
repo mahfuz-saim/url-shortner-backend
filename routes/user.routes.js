@@ -1,36 +1,35 @@
-import express from 'express'
-import db from '../db/index.js'
-import {eq} from 'drizzle-orm'
-import {usersTable} from '../models/schema.js'
-import {randomBytes, createHmac} from 'crypto'
-import {signupPostRequestValidation} from '../validations/request.validation.js'
+import express from "express";
+import { signupPostRequestValidation } from "../validations/request.validation.js";
+import { hashPassword } from "../utils/hash.js";
+import {existingUserByEmail, createUser} from "../services/user.services.js"
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/signup', async(req, res) => {
-    const validationResponse = await signupPostRequestValidation.safeParseAsync(req.body)
+router.post("/signup", async (req, res) => {
+  const validationResponse = await signupPostRequestValidation.safeParseAsync(
+    req.body,
+  );
 
-    if (validationResponse.error) {
-        return res.status(400).json({error: validationResponse.error.format()})
-    }
+  if (validationResponse.error) {
+    return res.status(400).json({ error: validationResponse.error.format() });
+  }
 
-    const {firstName, lastName, email, password} = validationResponse.data
+  const { firstName, lastName, email, password } = validationResponse.data;
 
-    const [existingUser] = await db.select({id : usersTable.id}).from(usersTable).where(eq(usersTable.email, email))
+  const existingUser = await existingUserByEmail(email)
 
-    if (existingUser) return res.status(400).json({error : `User with ${email} already exists`})
+  console.log('existing?', existingUser)
 
-    const salt = randomBytes(256).toString('hex')
-    const hashedPassword = createHmac('sha256', salt).update(password).digest('hex')
-    const [user] = await db.insert(usersTable).values({
-        email,
-        firstName,
-        lastName,
-        salt,
-        password: hashedPassword
-    }).returning({id: usersTable.id})
+  if (existingUser)
+    return res.status(400).json({ error: `User with ${email} already exists` });
+
+  const { salt, hashedPassword } = hashPassword(password);
+
+    const user = await createUser(email, firstName, lastName, salt, hashedPassword)
     
-    return res.status(201).json({data : {userId: user.id}})
-})
+    console.log(user)
 
-export default router
+  return res.status(201).json({ data: { user } });
+});
+
+export default router;
