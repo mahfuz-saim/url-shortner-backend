@@ -4,7 +4,13 @@ import { usersTable } from "../models/schema.js";
 
 export async function existingUserByEmail(email){
     const [existingUser] = await db
-    .select({ id: usersTable.id })
+    .select({ 
+      id: usersTable.id, 
+      email: usersTable.email,
+      firstName: usersTable.firstName,
+      lastName: usersTable.lastName,
+      salt: usersTable.salt,
+      password: usersTable.password })
     .from(usersTable)
     .where(eq(usersTable.email, email));
 
