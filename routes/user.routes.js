@@ -2,7 +2,7 @@ import express from "express";
 import { signupPostRequestValidation, loginPostValidation } from "../validations/request.validation.js";
 import { hashPassword } from "../utils/hash.js";
 import { existingUserByEmail, createUser } from "../services/user.services.js";
-import jwt from "jsonwebtoken";
+import {createToken} from "../utils/token.js"
 
 const router = express.Router();
 
@@ -57,7 +57,7 @@ router.post('/login', async(req, res) => {
     return res.status(400).json({ error: `Incorrect Password` });
   }
 
-  const token = jwt.sign({id: existingUser.id}, process.env.JWT_SECRET)
+  const token = await createToken({id: existingUser.id})
 
   return res.json({token})
 
