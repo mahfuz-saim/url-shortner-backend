@@ -11,3 +11,12 @@ export async function createToken(payload) {
     const token = jwt.sign(validationResponse.data, JWT_SECRET)
     return token
 }
+
+export function validationToken(token) {
+    try {
+        const payload = jwt.verify(token, JWT_SECRET)
+    return payload
+    } catch (error) {
+        return null
+    }
+}
