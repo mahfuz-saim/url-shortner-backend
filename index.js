@@ -1,6 +1,8 @@
 import express from "express";
 import userRouter from "./routes/user.routes.js";
+import urlRouter from "./routes/url.routes.js"
 import { authenticationMiddleware } from "./middlewares/auth.middleware.js";
+import 'dotenv/config'
 
 const app = express();
 const PORT = process.env.PORT ?? 8000;
@@ -13,6 +15,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/user", userRouter);
+app.use(urlRouter)
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
