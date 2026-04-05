@@ -9,7 +9,11 @@ export async function createUrl(target, shortCode, userId) {
       target,
       userId
     })
-    .returning({ id: urlTable.id, shortCode: shortCode, target: target  });
+    .returning({
+      id: urlTable.id,
+      shortCode: urlTable.shortCode,
+      target: urlTable.target,
+    });
 
     return url
 }
