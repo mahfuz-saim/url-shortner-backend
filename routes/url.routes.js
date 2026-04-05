@@ -1,7 +1,7 @@
 import express from 'express';
 import { shortenValidation } from '../validations/url.validation.js';
 import { nanoid } from 'nanoid';
-import { createUrl, getAllUrl, deleteUrl } from '../services/url.services.js';
+import { createUrl, getAllUrl, deleteUrl, getTarget } from '../services/url.services.js';
 import { ensureAuthenticated } from '../middlewares/auth.middleware.js';
 
 const router = express.Router()
@@ -31,6 +31,15 @@ router.delete('/:urlId', ensureAuthenticated, async function (req, res) {
     const result = await deleteUrl(deletingId, req.user.id)
 
     return res.json(result)
+})
+
+router.get('/:code', async function (req, res) {
+    const paramCode = req.params.code
+
+    const {target} = await getTarget(paramCode)
+    if (!target) return res.status(404).json({error: 'not found'})
+
+    return res.redirect(target)
 })
 
 export default router

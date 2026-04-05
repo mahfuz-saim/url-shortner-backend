@@ -38,3 +38,9 @@ export async function deleteUrl(deletingId, userId) {
 
   return result.length > 0
 }
+
+export async function getTarget(code) {
+  const [result] = await db.select({ target: urlTable.target }).from(urlTable).where(eq(urlTable.shortCode, code))
+
+  return result
+}
