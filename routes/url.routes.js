@@ -1,7 +1,7 @@
 import express from 'express';
 import { shortenValidation } from '../validations/url.validation.js';
 import { nanoid } from 'nanoid';
-import { createUrl } from '../services/url.services.js';
+import { createUrl, getAllUrl } from '../services/url.services.js';
 import { ensureAuthenticated } from '../middlewares/auth.middleware.js';
 
 const router = express.Router()
@@ -15,9 +15,16 @@ router.post('/shorten', ensureAuthenticated, async function (req, res) {
 
     const shortenCode = code ?? nanoid(6);
 
-    const urlResult = await createUrl(url, shortenCode, userId)
+    const urlResult = await createUrl(url, shortenCode, req.user.id)
 
     return res.status(201).json({id: urlResult.id, shortCode: urlResult.shortCode, target: urlResult.target})
+})
+
+router.get('/codes', ensureAuthenticated, async function (req, res) {
+    const codeResult = await getAllUrl(req.user.id)
+    console.log(codeResult)
+    
+    return res.json({codeResult})
 })
 
 export default router
